@@ -1,0 +1,142 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>微电影在线练习</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f0f8ff; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .question { font-size: 18px; margin-bottom: 20px; }
+        .options label { display: block; margin: 10px 0; }
+        .navigation { margin-top: 20px; }
+        button { padding: 10px 15px; margin: 5px; }
+        #summary { display: none; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div id="quiz"></div>
+    <div class="navigation">
+        <button onclick="prevQuestion()">上一题</button>
+        <button onclick="nextQuestion()">下一题</button>
+        <button onclick="restartQuiz()">重新开始</button>
+    </div>
+    <div id="summary">
+        <h2>总结与解析</h2>
+        <div id="results"></div>
+    </div>
+</div>
+
+<script>
+const questions = [
+    {
+        question: "以下哪项不是微电影的特点？",
+        type: "multiple_choice",
+        options: ["高制作成本与庞大团队", "低预算与小团队", "导演身兼数职", "由制作者初步发行"],
+        answer: "高制作成本与庞大团队",
+        explanation: "微电影通常预算低，制作团队小，导演经常同时负责编剧、摄影和剪辑等工作，高制作成本不符合其定义。"
+    },
+    {
+        question: "微电影与传统电影在观看体验上的主要区别是？",
+        type: "multiple_choice",
+        options: ["微电影在影院中沉浸式观看", "微电影需要3D眼镜", "微电影适合碎片时间在手机上观看", "微电影仅限蓝光光盘播放"],
+        answer: "微电影适合碎片时间在手机上观看",
+        explanation: "微电影专为移动平台和碎片化时间设计，更符合现代观众的观看习惯。"
+    },
+    {
+        question: "以下哪项是中国微电影迅速兴起的重要原因？",
+        type: "multiple_choice",
+        options: ["政府对内容严格监管", "拍摄技术普及与成本降低", "传统电影被全面禁止", "政府资助所有微电影"],
+        answer: "拍摄技术普及与成本降低",
+        explanation: "拍摄设备的普及和编辑工具的易得性极大降低了创作门槛，鼓励了草根参与。"
+    },
+    {
+        question: "以下哪个平台最不可能作为微电影的传播渠道？",
+        type: "multiple_choice",
+        options: ["电影院放映", "抖音或TikTok", "YouTube", "腾讯视频"],
+        answer: "电影院放映",
+        explanation: "微电影主要通过短视频平台和网络传播，很少进入传统电影院。"
+    },
+    {
+        question: "请简要说明微电影如何推动草根创意与文化表达。",
+        type: "short_answer",
+        explanation: "微电影让普通人也能低门槛参与创作，讲述本地故事，推动多元文化表达与交流。"
+    },
+    {
+        question: "请简要指出一个微电影行业所面临的挑战，并提出可能的解决方案。",
+        type: "short_answer",
+        explanation: "挑战之一是内容质量参差不齐。解决方案可以是建立统一的创作与评价标准，引入专业培训机制。"
+    }
+];
+
+let current = 0;
+const userAnswers = [];
+
+function renderQuestion() {
+    const quiz = document.getElementById('quiz');
+    const q = questions[current];
+    let html = `<div class="question"><strong>问题 ${current + 1}：</strong>${q.question}</div>`;
+    if (q.type === "multiple_choice") {
+        html += '<div class="options">';
+        q.options.forEach(opt => {
+            html += `<label><input type="radio" name="option" value="${opt}"> ${opt}</label>`;
+        });
+        html += '</div>';
+    } else {
+        html += `<textarea id="shortAnswer" rows="5" style="width:100%;"></textarea>`;
+    }
+    quiz.innerHTML = html;
+}
+
+function nextQuestion() {
+    const q = questions[current];
+    if (q.type === "multiple_choice") {
+        const selected = document.querySelector('input[name="option"]:checked');
+        userAnswers[current] = selected ? selected.value : "";
+    } else {
+        userAnswers[current] = document.getElementById("shortAnswer").value;
+    }
+
+    if (current < questions.length - 1) {
+        current++;
+        renderQuestion();
+    } else {
+        showSummary();
+    }
+}
+
+function prevQuestion() {
+    if (current > 0) {
+        current--;
+        renderQuestion();
+    }
+}
+
+function restartQuiz() {
+    current = 0;
+    userAnswers.length = 0;
+    document.getElementById("summary").style.display = "none";
+    document.getElementById("quiz").style.display = "block";
+    renderQuestion();
+}
+
+function showSummary() {
+    document.getElementById("quiz").style.display = "none";
+    const summary = document.getElementById("summary");
+    const results = document.getElementById("results");
+    results.innerHTML = "";
+    questions.forEach((q, i) => {
+        const userAns = userAnswers[i] || "（未作答）";
+        const correct = q.answer ? `<p><strong>正确答案：</strong>${q.answer}</p>` : "";
+        const explanation = `<p><strong>解析：</strong>${q.explanation}</p>`;
+        results.innerHTML += `<div><h3>问题 ${i + 1}：${q.question}</h3><p><strong>你的回答：</strong>${userAns}</p>${correct}${explanation}</div><hr>`;
+    });
+    summary.style.display = "block";
+}
+
+window.onload = renderQuestion;
+</script>
+</body>
+</html>
